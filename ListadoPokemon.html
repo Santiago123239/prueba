@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listado de Pokémon</title>
+  <style>
+    table {
+        float: left;
+      border-collapse: collapse;
+      width: 60%;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .detallesPokemon {
+      float: right;
+      width: 35%;
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+    .detallesPokemon img {
+      display: block;
+      margin: 0 auto;
+      max-width: 100px;
+      max-height: 100px;
+    }
+    button{
+        float: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Listado de Pokémon</h1>
+
+  <table id="tablaPokemon">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+      </tr>
+    </thead>
+    <tbody id="pokemonListado"></tbody>
+  </table>
+  <div class="detallesPokemon" id="detallesPokemon">
+    <h2>Detalles del Pokémon</h2>
+    <img id="ImagenPokemon" src="" alt="Imagen del Pokémon">
+    <p><strong>ID:</strong> <span id="idPokemon"></span></p>
+    <p><strong>Nombre:</strong> <span id="name"></span></p>
+    <p><strong>Experiencia Base:</strong> <span id="experiencia"></span></p>
+    <p><strong>Altura:</strong> <span id="altura"></span></p>
+    <p><strong>Peso:</strong> <span id="peso"></span></p>
+  </div>
+
+  <button id="atras">Atrás</button>
+  <button id="Adelante">Adelante</button>
+
+  <script>
+    const Listado = document.getElementById('pokemonListado');
+    const atrasBoton = document.getElementById('atras');
+    const adelanteBoton = document.getElementById('Adelante');
+    const detalles= document.getElementById('detallesPokemon');
+    const imagenesPokemon= document.getElementById('ImagenPokemon');
+    const IdPokemon = document.getElementById('idPokemon');
+    const nombrePokemon = document.getElementById('name');
+    const experienciaPokemon= document.getElementById('experiencia');
+    const alturaPokemon = document.getElementById('altura');
+    const pesoPokemon= document.getElementById('peso');
+
+    let indice = 0;
+
+    function ListadoPokemones(indice) {
+      fetch(`https://pokeapi.co/api/v2/pokemon?limit=20&offset=${indice}`)
+        .then(response => response.json())
+        .then(data => {
+          Listado.innerHTML = '';
+          data.results.forEach(pokemon => {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+              <td>${obtenerId(pokemon.url)}</td>
+              <td>${pokemon.name}</td>`;
+            fila.addEventListener('click', () => {
+                detallesPokemon(pokemon.url);
+            });
+            Listado.appendChild(fila);
+          });
+        })
+        
+    }
+
+    function detallesPokemon(url) {
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          imagenesPokemon.src = data.sprites.front_default;
+          IdPokemon.textContent = data.id;
+          nombrePokemon.textContent = data.name;
+          experienciaPokemon.textContent = data.base_experience;
+          alturaPokemon.textContent = data.height;
+          pesoPokemon.textContent = data.weight;
+          detalles.style.display = 'block';
+        })
+    }
+
+    function obtenerId(url) {
+      const id= url.split('/');
+      return id[id.length - 2];
+    }
+
+    atrasBoton.addEventListener('click', () => {
+      if (indice >= 20) {
+        indice -= 20;
+        ListadoPokemones(indice);
+      }
+    });
+
+    adelanteBoton.addEventListener('click', () => {
+      indice += 20;
+      ListadoPokemones(indice);
+    });
+
+    // Cargar el listado de Pokémon por primera vez
+    ListadoPokemones(indice);
+  </script>
+</body>
+
+</html>
